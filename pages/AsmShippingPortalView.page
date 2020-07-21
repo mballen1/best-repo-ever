@@ -1,0 +1,106 @@
+<apex:page showHeader="false" standardStylesheets="false" docType="html-5.0" applyHtmlTag="false" applyBodyTag="false" controller="AsmShipping_PortalViewController" action="{!Start}">
+  <apex:composition template="joinapi__template">
+    <apex:define name="jpTitle">
+      Select Shipping
+    </apex:define>
+    <apex:define name="jpStyles">
+      <style>
+        .banner{
+          padding-top:15px;
+        }
+        .errorMsg{
+          color:red;
+        }
+        select {
+            height: 39px;
+            box-shadow: none!important;
+            padding: 6px 12px;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #e5e9ec;
+            border-radius: 0;
+            transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+            font-size: 14px;
+            line-height: 1.428571429;
+            color: #555;
+            display: block;
+            font-family: inherit;
+            text-transform: none;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            box-sizing: border-box;
+            overflow: visible !important;
+        }
+        tbody tr:nth-of-type(odd) { border: none; }
+        td { padding: 5px 15px; }
+      </style>
+    </apex:define>
+    <apex:define name="jpMain">
+      <div class="in">
+        <div class="container m-t-30">
+          <div class="well col-md-12">
+            <apex:form >
+             <apex:pageBlock >
+                <div class="row">
+                  <div class="form-group col-md-12">
+                    <apex:pageMessages id="displaypageMessages" rendered="{!OR(hideShipping, shippingNotSelectedError)}"/>
+                  </div>
+                </div>
+
+               <apex:outputPanel rendered="{!NOT(hideShipping)}">
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <legend>Shipping Method</legend>
+                      </div>
+                      <div class="form-group col-md-12">
+                          <label>Select Shipping Address</label>
+                      </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="form-group col-md-12">
+                        <apex:selectList title="Select Address" value="{!selectedAddressName}" multiselect="false" size="1" onchange="GetShippingRatesForSelectedAddressJs();">
+                            <apex:selectOptions value="{!validAddressesSelectlistOptions}"/>
+                        </apex:selectList>
+                    </div>
+                    <apex:outputPanel id="AddressValidity">
+                    </apex:outputPanel>
+                   </div>
+                    <apex:actionStatus id="ShippingOptionsLoadingStatus">
+                        <apex:facet name="start">
+                        <apex:outputPanel >
+                            <apex:image url="/img/loading.gif"/> Loading...
+                        </apex:outputPanel>
+                    </apex:facet>
+
+                    <apex:facet name="stop">
+                    <apex:outputPanel id="selectShippingType">
+                        <apex:outputText rendered="{!validAddressNotFound}">A valid shipping address was not found. Please correct your shipping address.</apex:outputText>
+                        <apex:outputText rendered="{!shippingRateNotFound}">Estimated shipping charges could not be retrieved. Please call ASM's Customer Service Center at 800.336.5152 ext. 0</apex:outputText>                        
+                        <apex:selectRadio rendered="{!IF(validAddressNotFound || shippingRateNotFound, false, true)}" layout="pageDirection" value="{!selectedShippingRate}">
+                            <apex:selectOptions rendered="{!IF(validAddressNotFound || shippingRateNotFound, false, true)}" value="{!shippingRatesSelectlistOptions}" />
+                        </apex:selectRadio>
+                    </apex:outputPanel>
+                    </apex:facet>
+                    </apex:actionStatus>
+                    <apex:outputPanel >
+                        <div><br/><a href="https://{!hostName}/#em-addresses">Add or Update Shipping Addresses</a></div>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            <div class="row m-t-20 text-center">
+              <div class="col-xs-12">
+                <apex:commandbutton action="{!previousStep}" value="Previous Step" styleClass="btn btn-mini m-r-5 btn-neutral ladda-button nextStep btn-wrap"/>
+                <apex:commandbutton action="{!cancel}" value="Cancel" styleClass="btn btn-mini m-r-5 btn-neutral ladda-button nextStep btn-wrap"/>
+                <apex:commandbutton action="{!nextStep}" value="Next" styleClass="btn btn-mini m-r-5 btn-neutral ladda-button nextStep btn-wrap" style="background-color: #06b4f5;color: #fff;"/>
+              </div>
+            </div>
+            </apex:pageBlock>
+            <apex:actionFunction action="{!GetShippingRatesForSelectedAddress}" name="GetShippingRatesForSelectedAddressJs" reRender="selectShippingType, AddressValidity" status="ShippingOptionsLoadingStatus"/>                
+          </apex:form>
+          <br/>
+          </div>
+        </div>
+      </div>
+    </apex:define>
+  </apex:composition>
+</apex:page>

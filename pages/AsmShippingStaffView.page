@@ -1,0 +1,43 @@
+<apex:page controller="AsmShipping_StaffViewController" tabStyle="OrderApi__Sales_Order__c" action="{!Start}">
+  <apex:form >
+  <apex:sectionHeader title="Sales Order" subtitle="{!salesOrder.Name}"/>
+    <apex:pageMessages id="displaypageMessages" rendered="{!IF(NOT(shippingRequired) || validAddressNotFound || shippingRateNotFound || shippingNotSelectedError, true, false)}"/>
+    <apex:pageBlock title="Shipping & Handling">
+        <apex:outputPanel rendered="{!IF(shippingRequired && NOT(validAddressNotFound) && NOT(shippingRateNotFound), true, false)}">
+            <apex:inputCheckbox value="{!upsAccountNumberEntered}" onclick="refreshRatesJs();"/>
+            <apex:outputLabel >Select Customer UPS Account Number</apex:outputLabel>&nbsp;
+            <apex:inputText value="{!upsAccountNumber}" />
+        </apex:outputPanel>
+        <apex:outputPanel id="ShippingSection">
+        <apex:pageblockSection title="Select Address" collapsible="false" columns="1" rendered="{!IF(shippingRequired && NOT(validAddressNotFound) && NOT(shippingRateNotFound) && NOT(upsAccountNumberEntered), true, false)}">
+            <apex:selectList multiselect="false" size="1" value="{!selectedAddressName}" onchange="getShippingRatesForSelectedAddressJs();" title="Select Address">
+                <apex:selectOptions value="{!validAddressSelectlistOptions}"/>
+            </apex:selectList>
+            <apex:actionStatus id="ShippingOptionsLoadingStatus">
+                <apex:facet name="start">
+                <apex:outputPanel >
+                    <apex:image url="/img/loading.gif"/> Loading...
+                </apex:outputPanel>
+            </apex:facet>
+            <apex:facet name="stop">
+            <apex:outputPanel id="selectShippingType">
+                <apex:outputText rendered="{!validAddressNotFound}">A valid shipping address was not found. Please correct your shipping address.</apex:outputText>
+                <apex:outputText rendered="{!shippingRateNotFound}">Estimated shipping charges could not be retrieved.</apex:outputText>
+                <apex:selectRadio layout="pageDirection" value="{!selectedShippingRate}">
+                    <apex:selectOptions value="{!shippingRatesSelectlistOptions}" />
+                </apex:selectRadio>
+            </apex:outputPanel>
+            </apex:facet>
+            </apex:actionStatus>
+        </apex:pageblockSection>
+    </apex:outputPanel>
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandbutton action="{!cancel}" value="Cancel" />
+            <apex:commandbutton action="{!submit}" value="Submit" rendered="{!IF(validAddressNotFound || shippingRateNotFound, false, true)}" />
+        </apex:pageBlockButtons>
+    </apex:pageBlock>
+
+    <apex:actionFunction action="{!GetShippingRatesForSelectedAddress}" name="getShippingRatesForSelectedAddressJs" reRender="selectShippingType" status="ShippingOptionsLoadingStatus"/>
+    <apex:actionFunction action="{!refreshRates}" name="refreshRatesJs" reRender="ShippingSection, displaypageMessages"/>
+    </apex:form>
+</apex:page>
